@@ -19,7 +19,7 @@ Obtaining Movie ID
 2. From the URL (https://www.regmovies.com/movies/spider-man-no-way-home/ho00010969#/buy-tickets-by-film-for-cinemas?at=2021-12-24&for-movie=ho00010969&view-mode=list), the alphanumeric Movie ID is (ho00010969)
 
 Movie Name
-- Any name the user give
+- Any name the user gives
 
 Date
 - The date must be in the format of (YYYY-MM-DD) and should be the current date or one in the future when the movie is also playing
