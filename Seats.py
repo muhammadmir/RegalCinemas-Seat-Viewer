@@ -3,9 +3,10 @@ from datetime import datetime
 from random import choice, randint
 from string import ascii_lowercase
 from urllib3 import disable_warnings
-from json import dumps
+from json import loads, dumps
 from os import makedirs
 from os.path import exists
+CINEMA_ID, MOVIE_ID, MOVIE, DATE = '', '', '', datetime.now().strftime('%Y-%m-%d')
 
 disable_warnings()
 
@@ -81,7 +82,7 @@ class Theater():
                         if number >= 10: table += ' ' + seat.get_desc() + ' | '
                         else: table += seat.get_desc() + ' | '
                         found = True
-
+                        
                 if not found and number >= 10: table += ' ! | '
                 elif not found: table += '! | '
             table += '\n' + divider
@@ -97,7 +98,7 @@ class Seat():
     def __init__(self, row: str, number: int, status: int):
         self.row = row
         self.number = number
-        self.tag = row + number
+        self.tag = row + str(number)
         self.status = status
 
         self.available = status in [0, 3, 4, 7]
@@ -121,13 +122,16 @@ class Seat():
         #'❌' Taken - 1
         #'🦠' Social - 2
         #'🦽' Wheelchair - 3
+        # '' Unavailable - 5 (Not in JS code, but appears anyways)
         #'C'  Companion - 7
         #Abandoned using emojis because using them with letters and numbers in the table made it difficult to display all the results perfectly alligned.
         if self.status in [0, 4]: return '-'
         elif self.status == 1: return '#'
         elif self.status == 2: return '~'
         elif self.status == 3: return '@'
+        elif self.status == 5: return '!'
         elif self.status == 7: return '^'
+        else: return '!'
 
     def is_available(self):
         return self.available
@@ -137,6 +141,47 @@ class Seat():
     
     def is_companionable(self):
         return self.companionable
+
+def load_locations():
+    global CINEMA_ID
+    with open('Locations.json', 'r') as f: locations = loads(f.read())
+
+    while True:
+        while True:
+            o = input('Search cinemas by the following:\n1) Zip Code\n2) City\n3) State\n').strip()
+            if o == '1':
+                option = 'zip'
+                zip_code = input('Enter Zip Code: ').strip()
+                break
+            elif o == '2':
+                option = 'city'
+                city = input('Enter City: ').strip()
+                break
+            elif o == '3':
+                option = 'state'
+                state = input('Enter State (Abbreviated): ').strip()
+                break
+            else: print('Invalid option, try again.')
+
+        matched_locations = []
+        for location in locations:
+            if option == 'zip' and location['address']['postalCode'] == zip_code: matched_locations.append(location)
+            elif option == 'city' and location['address']['city'] == city: matched_locations.append(location)
+            elif option == 'state' and location['address']['state'] == state: matched_locations.append(location)
+
+        if len(matched_locations) > 0:
+            print(f'Found {len(matched_locations)} locations, select one')
+            counter = 0
+            for location in matched_locations:
+                counter += 1
+                print(f'{counter}) {location["name"]}')
+
+            while True:
+                o = int(input().strip())
+                if o not in range(counter + 1): print('Invalid option, try again.')
+                else:
+                    CINEMA_ID = matched_locations[o - 1]['externalCode']
+                    return
 
 def gen_id():
     s = 'RWEB'
@@ -208,11 +253,14 @@ def get_seatings():
                         s = Theater(MOVIE, screening['Time'], screening['Formatting'], screening['Link'], seats)
                         s.save_table()
 
-DATE = datetime.now().strftime('%Y-%m-%d')
+def main():
+    global MOVIE, MOVIE_ID, DATE
 
-CINEMA_ID = input('Cinema ID\n').strip()
-MOVIE_ID = input('Movie ID\n').strip()
-MOVIE = input('Movie Name\n').strip()
-DATE = input(f'Date (ex: {DATE})\n').strip()
+    load_locations()
+    MOVIE_ID = input('Movie ID\n').strip()
+    MOVIE = input('Movie Name\n').strip()
+    DATE = input(f'Date (ex: {DATE})\n').strip()
 
+
+main()
 get_seatings()
