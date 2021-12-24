@@ -1,5 +1,5 @@
 # RegalCinemas-Seat-Viewer
-View the seatings and the seat types for a specific movie at a specific theater for all screening types on a specific date.
+View all the seatings in an ASCII table for all screening types of a specific movie at a specific Regal Cinemas location.
 
 Three inputs are required:
 
